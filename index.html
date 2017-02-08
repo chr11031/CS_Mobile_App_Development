@@ -1,15 +1,60 @@
 <html>
 <head>
 	<script>
+	
+		var isHoldingDown = false;
+	
+		function canvasClick(event) 
+		{
+			var canv = document.getElementById("myCanvas");
+
+			var canvX = canv.getBoundingClientRect().left;
+			var canvY = canv.getBoundingClientRect().top;
+			var x = event.clientX - canvX;
+			var y = event.clientY - canvY;
+			
+			var myContext = canv.getContext("2d");
+			var pixel = myContext.createImageData(1,1);
+			pixel.data[0] = 255;	// Red
+			pixel.data[1] = 0;		// Green
+			pixel.data[2] = 0;		// Blue
+			pixel.data[3] = 255;	// Alpha
+				
+			myContext.putImageData(pixel, x, y);					
+		}
+	
+		function canvasStartClick(event) 
+		{
+			isHoldingDown = true;
+			canvasClick(event);
+		}
+		
+		function canvasDrag(event) 
+		{
+			if(isHoldingDown) 
+			{
+				canvasClick(event);
+			}
+		}
+		
+		function notDragging(event) 
+		{
+			isHoldingDown = false;
+		}
+	
 		function setupListeners() 
 		{
-			;
+			var canv = document.getElementById("myCanvas");
+			canv.addEventListener("mousedown", canvasStartClick);
+			canv.addEventListener("mousemove", canvasDrag);
+
+			canv.addEventListener("mouseleave", notDragging);
+			canv.addEventListener("mouseup", notDragging);							
 		}
 	</script>
 </head>
-<body onload=""setupListeners()">
+<body onload="setupListeners()">
 	<h1>CANVAS</h1>
-	<canvas id="myCanvas" width="200" height="100" style="border:1px solid #000000;"></canvas>
+	<canvas id="myCanvas" width="600" height="600" style="border:1px solid #000000;"></canvas>
 </body>
-
 </html>
