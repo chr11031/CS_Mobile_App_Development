@@ -21,23 +21,33 @@ var clickColor = new Array();
 
 black.addEventListener('click', function(){
 	currentColor = colors.colorBlack;
-	currentTool = tools.toolPencil;
+	if(currentTool != tools.toolText){
+		currentTool = tools.toolPencil;
+	}
 });
 purple.addEventListener('click', function(){
 	currentColor = colors.colorPurple;
-	currentTool = tools.toolPencil;
+	if(currentTool != tools.toolText){
+		currentTool = tools.toolPencil;
+	}
 });
 green.addEventListener('click', function(){
 	currentColor = colors.colorGreen;
-	currentTool = tools.toolPencil;
+	if(currentTool != tools.toolText){
+		currentTool = tools.toolPencil;
+	}
 });
 blue.addEventListener('click', function(){
 	currentColor = colors.colorBlue;
-	currentTool = tools.toolPencil;
+	if(currentTool != tools.toolText){
+		currentTool = tools.toolPencil;
+	}
 });
 red.addEventListener('click', function(){
 	currentColor = colors.colorRed;
-	currentTool = tools.toolPencil;
+	if(currentTool != tools.toolText){
+		currentTool = tools.toolPencil;
+	}
 });
 /**************************************************/
 //sizes
@@ -221,6 +231,8 @@ function addTextBox(mouseX, mouseY){
 		input.style.position = "absolute";
 		input.style.left = mouseX + "px";
 		input.style.top = mouseY - 18 + "px";
+		input.style.color = currentColor;
+		//input.style.font-size = currentSize * 10 + "%";
 		clickPara.push(input);
 }
 
