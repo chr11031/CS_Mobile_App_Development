@@ -1,91 +1,105 @@
 //drawing
 //color button declarations and listeners
+//turn into object Colors
 var purple = document.getElementById('purple');
 var green = document.getElementById('green');
 var blue = document.getElementById('blue');
 var red = document.getElementById('red');
 var black = document.getElementById('black');
-var colorPurple = "#cb3594";
-var colorGreen = "#00ff00";
-var colorRed = "#ff0000";
-var colorBlue = "#0000ff";
-var colorWhite = "#FFFFFF";
-var colorBlack = "#000000";
-var currentColor = colorRed;
+//colors object for holding colorsl
+colors = {
+	"colorPurple":"#cb3594",
+	"colorGreen":"#22CC33",
+	"colorRed":"#ff0000",
+	"colorBlue":"#0000ff",
+	"colorWhite":"#FFFFFF",
+	"colorBlack":"#000000",
+};
+
+var currentColor = colors.colorRed;
 var clickColor = new Array();
 
 black.addEventListener('click', function(){
-	currentColor = colorBlack;
-	currentTool = toolPaint;
+	currentColor = colors.colorBlack;
+	currentTool = tools.toolPencil;
 });
 purple.addEventListener('click', function(){
-	currentColor = colorPurple;
-	currentTool = toolPaint;
+	currentColor = colors.colorPurple;
+	currentTool = tools.toolPencil;
 });
 green.addEventListener('click', function(){
-	currentColor = colorGreen;
-	currentTool = toolPaint;
+	currentColor = colors.colorGreen;
+	currentTool = tools.toolPencil;
 });
 blue.addEventListener('click', function(){
-	currentColor = colorBlue;
-	currentTool = toolPaint;
+	currentColor = colors.colorBlue;
+	currentTool = tools.toolPencil;
 });
 red.addEventListener('click', function(){
-	currentColor = colorRed;
-	currentTool = toolPaint;
+	currentColor = colors.colorRed;
+	currentTool = tools.toolPencil;
 });
-
+/**************************************************/
 //sizes
+//turn into Sizes Object
 var small = document.getElementById('small');
 var normal = document.getElementById('normal');
 var large = document.getElementById('large');
 var huge = document.getElementById('huge');
-var sizeSmall = 3;
-var sizeNormal = 5;
-var sizeLarge = 7;
-var sizeHuge = 10;
+//sizes object for holding sizes
+sizes = {
+	"sizeSmall":3,
+	"sizeNormal":5,
+	"sizeLarge":7,
+	"sizeHuge":12
+};
+
+var currentSize = sizes.sizeNormal;
 var clickSize = new Array();
-var currentSize = sizeNormal;
 
 small.addEventListener('click', function(){
-	currentSize = sizeSmall;
+	currentSize = sizes.sizeSmall;
 });
 normal.addEventListener('click', function(){
-	currentSize = sizeNormal;
+	currentSize = sizes.sizeNormal;
 });
 large.addEventListener('click', function(){
-	currentSize = sizeLarge;
+	currentSize = sizes.sizeLarge;
 });
 huge.addEventListener('click', function(){
-	currentSize = sizeHuge;
+	currentSize = sizes.sizeHuge;
 });
-
+/***************************************************/
 //tool buttons
-var paint = document.getElementById('paint');
+var pencil = document.getElementById('pencil');
 var eraser = document.getElementById('eraser');
 var textbox = document.getElementById('textbox');
 var bucket = document.getElementById('bucket');
 var clear = document.getElementById('clear');
-var toolPaint = "paint";
-var toolEraser = "eraser";
-var toolBucket = "bucket";
-var toolText = "text";
-var currentTool = toolPaint;
+//tool object for holding tool types
+tools = {
+	"toolPencil":"pencil",
+	"toolEraser":"eraser",
+	"toolBucket":"bucket",
+	"toolText":"text"
+};
+
+var currentTool = tools.toolPencil;
 var clickTool = new Array();
 
-paint.addEventListener('click', function(){
-	currentTool = toolPaint;
+pencil.addEventListener('click', function(){
+	currentTool = tools.toolPencil;
 });
 eraser.addEventListener('click', function(){
-	currentTool = toolEraser;
+	currentTool = tools.toolEraser;
 });
 bucket.addEventListener('click', function(){
-	currentTool = toolBucket;
+	currentTool = tools.toolBucket;
 });
 textbox.addEventListener('click', function(){
-	currentTool = toolText;
+	currentTool = tools.toolText;
 });
-
+/**********************************************/
 //clear function
 clear.addEventListener('click', function(){
 	context.clearRect(0,0, context.canvas.width, context.canvas.height);
@@ -95,19 +109,26 @@ clear.addEventListener('click', function(){
 	clickY = [];
 	clickDrag = [];
 	clickTool = [];
+	if (document.getElementById("input1")){
+		for(var j = clickPara.length; j > 0; j--){
+			document.body.removeChild(document.getElementById("input1"));
+			clickPara.pop();
+		}
+	}
 });
 
 //creating the clicks that will be recorded
 var clickX = new Array();
 var clickY = new Array();
 var clickDrag = new Array();
+var clickPara = new Array();
 var paint;
 
 //canvas creation
 var canvasDiv = document.getElementById('canvasDiv');
 var canvas = document.createElement('canvas');
-canvas.setAttribute('width', 600);
-canvas.setAttribute('height', 300);
+canvas.setAttribute('width', 370);
+canvas.setAttribute('height', 580);
 canvas.setAttribute('id', 'canvas');
 canvas.setAttribute('style', 'border: 5px solid red;');
 canvasDiv.appendChild(canvas);
@@ -123,9 +144,13 @@ $('#canvas').mousedown(function(e){
 	var mouseX = e.pageX - this.offsetLeft;
 	var mouseY = e.pageY - this.offsetTop;
 	
-	paint = true;
-	addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
-	redraw();
+	if(currentTool == tools.toolText){
+		addTextBox(mouseX, mouseY);
+	}else{
+		paint = true;
+		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+		redraw();
+	}
 });
 
 canvas.addEventListener('touchstart', function(e){
@@ -172,11 +197,12 @@ canvas.addEventListener('mouseleave', function(e){
 
 //puts the clicked spots into the click arrays.
 function addClick(x, y, dragging){
+	
 	clickX.push(x);
 	clickY.push(y);
 	clickDrag.push(dragging);
-	if(currentTool == toolEraser){
-		clickColor.push(colorWhite);
+	if(currentTool == tools.toolEraser){
+		clickColor.push(colors.colorWhite);
 	}else{
 		clickColor.push(currentColor);
 	}
@@ -184,10 +210,25 @@ function addClick(x, y, dragging){
 	clickTool.push(currentTool);
 }
 
+function addTextBox(mouseX, mouseY){
+	var input = document.createElement('p');
+		input.setAttribute("name","input1");
+		input.setAttribute("id","input1");
+		var newText = document.createTextNode("write here");
+		input.contentEditable = true;
+		input.appendChild(newText);
+		document.body.appendChild(input);
+		input.style.position = "absolute";
+		input.style.left = mouseX + "px";
+		input.style.top = mouseY - 18 + "px";
+		clickPara.push(input);
+}
+
 function redraw(){
 	context.lineJoin = "round";
 	
 	for(var i=0; i < clickX.length; i++){
+		//if clickTool[i] = tools.toolPencil
 		context.beginPath();
 		if(clickDrag[i] && i){
 			context.moveTo(clickX[i-1], clickY[i-1]);
@@ -199,5 +240,6 @@ function redraw(){
 		context.strokeStyle = clickColor[i];
 		context.lineWidth = clickSize[i];
 		context.stroke();
+		//else if clickTool[i] = tools.toolBucket
 	}
 }
