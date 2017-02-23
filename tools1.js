@@ -6,7 +6,7 @@ var green = document.getElementById('green');
 var blue = document.getElementById('blue');
 var red = document.getElementById('red');
 var black = document.getElementById('black');
-//colors object for holding colorsl
+//colors object for holding colors
 colors = {
 	"colorPurple":"#cb3594",
 	"colorGreen":"#22CC33",
@@ -21,31 +21,31 @@ var clickColor = new Array();
 
 black.addEventListener('click', function(){
 	currentColor = colors.colorBlack;
-	if(currentTool != tools.toolText){
+	if(currentTool == tools.toolEraser){
 		currentTool = tools.toolPencil;
 	}
 });
 purple.addEventListener('click', function(){
 	currentColor = colors.colorPurple;
-	if(currentTool != tools.toolText){
+	if(currentTool == tools.toolEraser){
 		currentTool = tools.toolPencil;
 	}
 });
 green.addEventListener('click', function(){
 	currentColor = colors.colorGreen;
-	if(currentTool != tools.toolText){
+	if(currentTool == tools.toolEraser){
 		currentTool = tools.toolPencil;
 	}
 });
 blue.addEventListener('click', function(){
 	currentColor = colors.colorBlue;
-	if(currentTool != tools.toolText){
+	if(currentTool == tools.toolEraser){
 		currentTool = tools.toolPencil;
 	}
 });
 red.addEventListener('click', function(){
 	currentColor = colors.colorRed;
-	if(currentTool != tools.toolText){
+	if(currentTool == tools.toolEraser){
 		currentTool = tools.toolPencil;
 	}
 });
@@ -112,13 +112,16 @@ textbox.addEventListener('click', function(){
 /**********************************************/
 //clear function
 clear.addEventListener('click', function(){
+	//clear the rectangle of all painted pieces
 	context.clearRect(0,0, context.canvas.width, context.canvas.height);
+	//clear all of the arrays that have clicks so they can start fresh
 	clickColor = [];
 	clickSize = [];
 	clickX = [];
 	clickY = [];
 	clickDrag = [];
 	clickTool = [];
+	//remove and clear the board of textboxes
 	if (document.getElementById("input1")){
 		for(var j = clickPara.length; j > 0; j--){
 			document.body.removeChild(document.getElementById("input1"));
@@ -143,12 +146,13 @@ canvas.setAttribute('id', 'canvas');
 canvas.setAttribute('style', 'border: 5px solid red;');
 canvasDiv.appendChild(canvas);
 
-if(typeof G_vmlCanvasManager != 'undefined'){
-	canvas = G_vmlCanvasManager.initElement(canvas);
-}
+//if (typeof G_vmlCanvasManager != 'undefined'){
+//	canvas = G_vmlCanvasManager.initElement(canvas);
+//}
+
 context = canvas.getContext("2d");
 
-//simple drawing
+//simple drawing through click events
 //touching the mouse or finger
 $('#canvas').mousedown(function(e){
 	var mouseX = e.pageX - this.offsetLeft;
@@ -156,6 +160,8 @@ $('#canvas').mousedown(function(e){
 	
 	if(currentTool == tools.toolText){
 		addTextBox(mouseX, mouseY);
+	}else if (currentTool == tools.toolBucket){
+		fillArea(mouseX, mouseY);
 	}else{
 		paint = true;
 		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
@@ -218,6 +224,64 @@ function addClick(x, y, dragging){
 	}
 	clickSize.push(currentSize);
 	clickTool.push(currentTool);
+}
+
+function fillArea(x, y) {
+
+	// Initialize drawing grid buffer to 'not-drawn' state
+	var drawnArea = new Array(canvas.width * canvas.height);
+	for(var i = 0; i < drawnArea.length; i++) 
+	{
+		drawnArea[i] = 0;
+	}	
+
+	// Setup base color, fill color pixel
+	var baseColor = context.getImageData(x, y, 1, 1).data;
+	var cColor = parseInt(currentColor.replace("#", "0x"));
+	var fillPixel = context.createImageData(1,1);
+	fillPixel.data[0] = ((cColor >> 16) % 256);	// Red
+	fillPixel.data[1] = ((cColor >> 8)  % 256); // Green
+	fillPixel.data[2] = (cColor 		% 256);	// Blue	
+	fillPixel.data[3] = 255;
+	
+	// Inverted recursive function
+	var stack = new Array();
+	var firstPixel = [x, y];
+	stack.push(firstPixel);
+
+	// Fill the entire area
+	while(stack.length != 0) {
+		
+		// Draw Pixel, mark it as such, remove pixel
+		x = stack[stack.length - 1][0];
+		y = stack[stack.length - 1][1];
+		context.putImageData(fillPixel, x, y);				
+		drawnArea[x + (y * canvas.width)] = 1;
+		stack.pop();		
+		
+		// Setup neighbors
+		var neighbors = [ [x+1, y], [x-1, y], [x, y-1], [x, y+1] ];
+
+		// Check each neighbor	
+		for(var i = 0; i < 4; i++) 
+		{
+			// Bounds check, previously marked check			
+			if( (neighbors[i][0] > 0 && neighbors[i][0] < canvas.width) && 
+				(neighbors[i][1] > 0 && neighbors[i][1] < canvas.height) &&
+				(drawnArea[neighbors[i][0] + (neighbors[i][1] * canvas.width)] != 1))
+			{
+				// Check for base color of neighbor
+				var neighborPixel = context.getImageData(neighbors[i][0], neighbors[i][1], 1,1); 
+				if( (neighborPixel.data[0] == baseColor[3]) && 
+					(neighborPixel.data[1] == baseColor[2]) && 
+					(neighborPixel.data[2] == baseColor[1]) && 
+					(neighborPixel.data[3] == baseColor[0]))
+				{					
+					stack.push(neighbors[i]);
+				}
+			}
+		}		
+	}
 }
 
 function addTextBox(mouseX, mouseY){
