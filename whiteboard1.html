@@ -2,33 +2,62 @@
 <html>
 <head>
 	<meta charset="UTF-8"/>
-	<title>Events Examples</title>
-	<link href="intro.css"></link>
+	<title>Whiteboard</title>
+    <style>
+        li {
+            list-style-type: none;
+            display: inline-block;
+        }
+        ul {
+            margin-left: -37px;
+            margin-bottom: -17px;
+        }
+        #icon-group {
+            margin-top: -15px;
+            z-index: 1;
+        }
+        .icons {
+            max-width: 60px;
+            border: solid #D3D3D3 2px;
+        }
+        #trash {
+            background-color: #d3d3d3;
+        }
+    </style>
 </head>
 <body>
 	
 	<!--<canvas id="myCanvas" width="600" height="400" style="border: 7px solid #996622; border-radius: 5px;">
 	</canvas>-->
 	
-	<div id="canvasDiv"></div>
-	
-	<button id="paint">Paint</button>
-	<button id="eraser">Eraser</button>
-	<button id="bucket">Bucket</button>
-	<button id="textbox">TextBox</button>
-	<button id="clear">Clear</button>
-	</br>
-	<button id="small">Small</button>
-	<button id="normal">Normal</button>
-	<button id="large">Large</button>
-	<button id="huge">Huge</button>
-	</br>
-	<button id="purple">Purple</button>
-	<button id="green">Green</button>
-	<button id="blue">Blue</button>
-	<button id="red">Red</button>
-	<button id="black">Black</button>
-	
+      
+	<div id="canvasDiv"></div> 
+    <div id='icon-group'>
+        <ul id='sizeMenu'>
+            <li><img src='icons/small.png' id='small' class='icons'/></li>
+            <li><img src='icons/normal.png' id='normal'  class='icons'/></li>
+            <li><img src='icons/large.png' id='large'  class='icons'/></li>
+            <li><img src='icons/huge.png' id='huge'  class='icons'/></li>
+        </ul>
+        <ul id='colorMenu'>
+            <li><img src='icons/color-red.png' id='red'  class='icons'/></li>
+            <li><img src='icons/color-green.png' id='green'  class='icons'/></li>
+            <li><img src='icons/color-blue.png' id='blue'  class='icons'/></li>
+            <li><img src='icons/color-black.png' id='black' class='icons'/></li>
+        </ul>
+        <ul>
+            <li><img src='icons/color-red.png' id="color" class='icons'/></li>
+            <li><img src='icons/pencil-selected.png' id="paint" class='icons'/></li>
+            <li><img src='icons/eraser.png' id="eraser" class='icons'/></li>
+        </ul>
+        <ul>
+            <li><img src='icons/bucket.png' id="bucket" class='icons'/></li>
+            <li><img src='icons/text.png' id="textbox" class='icons'/></li>
+            <li><img src='icons/normal.png' id="size" class='icons'/></li>
+            <li><img src='icons/trash.png' id="clear" class='icons'/></li>
+        </ul>
+    </div>
+
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 	<script src="tools1.js"></script>
 </body>
