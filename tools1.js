@@ -2,6 +2,10 @@
 document.getElementById('sizeMenu').style.display = 'none';
 document.getElementById('colorMenu').style.display = 'none';
 
+// Actions stores what's been done so far
+var actions = [];
+
+
 //color button declarations and listeners
 var purple = document.getElementById('purple');
 var green = document.getElementById('green');
@@ -23,7 +27,7 @@ color.addEventListener('click', function() {
 });
 
 black.addEventListener('click', function(){
-	currentColor = colorBlack;
+    currentColor = colorBlack;
     if(currentTool == toolEraser){
         currentTool = toolPaint;
         resetIcons();
@@ -150,14 +154,24 @@ clear.addEventListener('click', function(){
 	clickY = [];
 	clickDrag = [];
 	clickTool = [];
-      if (document.getElementById("input1")){
+    if (document.getElementById("input1")){
         for(var j = clickPara.length; j > 0; j--){
             document.body.removeChild(document.getElementById("input1"));
             clickPara.pop();
-        }
+        }	
     }
+
+    // Reset actions to null
+    actions = [];
+    updateActions();
 });
 
+function updateActions() {
+    sessionStorage.setItem("actionsList", JSON.stringify(actions));
+    sessionStorage.setItem("clickX", JSON.stringify(clickX));
+    sessionStorage.setItem("clickY", JSON.stringify(clickY));
+    sessionStorage.setItem("clickDrag", JSON.stringify(clickDrag));
+}
 
 //creating the clicks that will be recorded
 var clickX = new Array();
@@ -180,11 +194,10 @@ if(typeof G_vmlCanvasManager != 'undefined'){
 }
 context = canvas.getContext("2d");
 
-//simple drawing
-//touching the mouse or finger
-$('#canvas').mousedown(function(e){
-    var mouseX = e.pageX - this.offsetLeft;
-    var mouseY = e.pageY - this.offsetTop;
+
+function mouseDown(e, offLeft, offTop) {
+    var mouseX = e.pageX - offLeft;
+    var mouseY = e.pageY - offTop;
     
     if(currentTool == toolText){
         addTextBox(mouseX, mouseY);
@@ -192,32 +205,110 @@ $('#canvas').mousedown(function(e){
         fillArea(mouseX, mouseY);
     }else{
         paint = true;
-        addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+        addClick(e.pageX - offLeft, e.pageY - offTop);
         redraw();
     }
+}
+
+
+//simple drawing
+//touching the mouse or finger
+$('#canvas').mousedown(function(e){
+
+    mouseDown(e, this.offsetLeft, this.offsetTop);
+
+    // Store each click action accordingly
+    var action = {"mouseX": e.pageX,
+		  "mouseY": e.pageY,
+		  "offLeft" : this.offsetLeft,
+		  "offTop"  : this.offsetTop,
+		  "currentTool": currentTool, 
+		  "currentSize": currentSize, 
+		  "currentColor": currentColor,
+		  "paint": paint,
+		  "type": "mouseDown"};
+    actions.push(action);
+    updateActions();
 });
+
+function touchStart(e, offLeft, offTop) {
+    var mouseX = e.pageX - offLeft;
+    var mouseY = e.pageY - offTop;
+    
+    paint = true;
+    addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+    redraw();
+}
+
+
 canvas.addEventListener('touchstart', function(e){
-	var mouseX = e.pageX - this.offsetLeft;
-	var mouseY = e.pageY - this.offsetTop;
-	
-	paint = true;
-	addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
-	redraw();
+    touchStart(e, this.offsetLeft, this.offsetTop);
+
+    // Store each click action accordingly
+    var action = {"mouseX": e.pageX,
+		  "mouseY": e.pageY,
+		  "offLeft" : this.offsetLeft,
+		  "offTop"  : this.offsetTop,
+		  "currentTool": currentTool, 
+		  "currentSize": currentSize, 
+		  "currentColor": currentColor,
+		  "paint": paint,
+		  "type": "touchStart"};
+    actions.push(action);
+    updateActions();
 });
+
+
+function mouseMove(e, offLeft, offTop) {
+    if(paint){
+	addClick(e.pageX - offLeft, e.pageY - offTop, true);
+	redraw();
+    }
+}
 
 //drag the finger or mouse
 $('#canvas').mousemove(function(e){
-	if(paint){
-		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-		redraw();
-	}
+
+    mouseMove(e, this.offsetLeft, this.offsetTop);
+
+    // Store each click action accordingly
+    var action = {"mouseX": e.pageX,
+		  "mouseY": e.pageY,
+		  "offLeft" : this.offsetLeft,
+		  "offTop"  : this.offsetTop,
+		  "currentTool": currentTool, 
+		  "currentSize": currentSize, 
+		  "currentColor": currentColor,
+		  "paint": paint,
+		  "type": "mouseMove"};
+    actions.push(action);
+    updateActions();
 });
 
+function touchMove(e, offLeft, offTop) {
+    if(paint){
+	addClick(e.pageX - offLeft, e.pageY - offTop, true);
+	redraw();
+    }
+}
+
 canvas.addEventListener('touchmove', function(e){
-	if(paint){
-		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-		redraw();
-	}
+    
+    touchMove(e, this.offsetLeft, this.offsetTop);
+    
+    // Store each click action accordingly
+    var action = {"mouseX": e.pageX,
+		  "mouseY": e.pageY,
+		  "offLeft" : this.offsetLeft,
+		  "offTop"  : this.offsetTop,
+		  "currentTool": currentTool, 
+		  "currentSize": currentSize, 
+		  "currentColor": currentColor,
+		  "paint": paint,
+		  "type": "touchMove"};
+    actions.push(action);
+    updateActions();
+
 });
 
 //lift the mouse or finger
@@ -238,19 +329,21 @@ canvas.addEventListener('mouseleave', function(e){
 	paint = false;
 });
 
+
+
 //puts the clicked spots into the click arrays.
 function addClick(x, y, dragging){
     context = canvas.getContext('2d');
-	clickX.push(x);
-	clickY.push(y);
-	clickDrag.push(dragging);
-	if(currentTool == toolEraser){
-		clickColor.push(colorWhite);
-	}else{
-		clickColor.push(currentColor);
-	}
-	clickSize.push(currentSize);
-	clickTool.push(currentTool);
+    clickX.push(x);
+    clickY.push(y);
+    clickDrag.push(dragging);
+    if(currentTool == toolEraser){
+	clickColor.push(colorWhite);
+    }else{
+	clickColor.push(currentColor);
+    }
+    clickSize.push(currentSize);
+    clickTool.push(currentTool);
 }
 
 function redraw(){
@@ -346,6 +439,43 @@ function addTextBox(mouseX, mouseY){
         //input.style.font-size = currentSize * 10 + "%";
         clickPara.push(input);
         this.select()
+}
+
+if(sessionStorage.getItem("actionsList") != null)
+    actions = JSON.parse(sessionStorage.getItem("actionsList"));
+if(sessionStorage.getItem("clickX") != null)
+    clickX = JSON.parse(sessionStorage.getItem("clickX"));
+if(sessionStorage.getItem("clickY") != null)
+    clickY = JSON.parse(sessionStorage.getItem("clickY"));
+if(sessionStorage.getItem("clickDrag") != null)
+    clickDrag = JSON.parse(sessionStorage.getItem("clickDrag"));
+
+
+if(actions == null || typeof(actions) != "object")
+{
+    actions = [];
+    
+}
+else 
+{
+    
+    for(var i = 0; i < actions.length; i++) 
+    {
+	var e = { "pageX": actions[i].mouseX, "pageY": actions[i].mouseX };
+	currentTool = actions[i].currentTool;
+	currentSize = actions[i].currentSize;
+	currentColor = actions[i].currentColor;
+	paint = actions[i].paint;
+	
+	if(actions[i].type == "mouseMove")
+	    mouseMove(e, actions[i].offLeft, actions[i].offTop);
+	else if(actions[i].type == "mouseDown")
+	    mouseDown(e, actions[i].offLeft, actions[i].offTop);
+	else if(actions[i].type == "toucMove")
+	    touchMove(e, actions[i].offLeft, actions[i].offTop);
+	else if(actions[i].type == "touchStart")
+	    touchStart(e, actions[i].offLeft, actions[i].offTop);
+    }
 }
 
 //css for icons
